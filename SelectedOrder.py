@@ -1,3 +1,5 @@
+from gurobipy import *
+
 def SelectedOrder(I,J,K,h,tt,s,S,sigma):
     #I：期数；J：零件数；K：机器数；
     
@@ -7,7 +9,7 @@ def SelectedOrder(I,J,K,h,tt,s,S,sigma):
     Y_a=m.addVars(I,J,K,lb=0,vtype=GRB.CONTINUOUS,name="Y_a")
     Y_b=m.addVars(I,J,K,lb=0,vtype=GRB.CONTINUOUS,name="Y_b")
     Y_bar=m.addVars(I,J,K,lb=0,vtype=GRB.CONTINUOUS,name="Y_bar")
-    x_var=m.addVars(I,J,K,vtype=GRB.BINARY,name="x_var")
+    x=m.addVars(I,J,K,vtype=GRB.BINARY,name="x")
     delta=m.addVars(I,K,vtype=GRB.BINARY,name="delta")
         
     #目标
@@ -15,48 +17,50 @@ def SelectedOrder(I,J,K,h,tt,s,S,sigma):
     m.setObjective(obj,GRB.MINIMIZE)
 
     #约束
-    m.addConstrs(h_bar[i,k] >= h[j] * x_var[i,j,k] for i in range (I) for j in range (J) for k in range (K))
-    m.addConstrs(((((i+1)*10)+quicksum(h_bar[t,k] for t in range (i+1)))*x_var[i,j,k]) == Y_a[i,j,k] for i in range (I) for j in range (J) for k in range (K))
-    m.addConstrs(tt[j]*x_var[i,j,k] >= Y_b[i,j,k] for i in range (I) for j in range (J) for k in range (K))   
+    m.addConstrs(h_bar[i,k] >= h[j] * x[i,j,k] for i in range (I) for j in range (J) for k in range (K))
+    m.addConstrs(((((i+1)*10)+quicksum(h_bar[t,k] for t in range (i+1)))*x[i,j,k]) == Y_a[i,j,k] for i in range (I) for j in range (J) for k in range (K))
+    m.addConstrs(tt[j]*x[i,j,k] >= Y_b[i,j,k] for i in range (I) for j in range (J) for k in range (K))   
     m.addConstrs(Y_bar[i,j,k]>=Y_a[i,j,k]-Y_b[i,j,k] for i in range (I) for j in range (J) for k in range (K) ) 
-    m.addConstrs(quicksum(s[j]*x_var[i,j,k] for j in range (J)) <= (1.5 * S) for i in range (I) for k in range (K))
-    m.addConstrs(quicksum(x_var[i,j,k] for i in range (I) for k in range (K)) == 1 for j in range (J))    
-    m.addConstrs(quicksum(x_var[i,j,k] for j in range (J)) <= 10000000000000*delta[i,k] for i in range (I) for k in range (K))
+    m.addConstrs(quicksum(s[j]*x[i,j,k] for j in range (J)) <= (1.5 * S) for i in range (I) for k in range (K))
+    m.addConstrs(quicksum(x[i,j,k] for i in range (I) for k in range (K)) == 1 for j in range (J))    
+    m.addConstrs(quicksum(x[i,j,k] for j in range (J)) <= 10000000000000*delta[i,k] for i in range (I) for k in range (K))
         
     #求解
-    m.Params.MIPGap = 0.1
+    m.Params.MIPGap = 0.5
     m.optimize()
     #m.status==gurobipy.GRB.Status.OPTIMAL
-    print('optimal value: %.2f'%obj.getValue())
     m.printAttr('x')
-  #  fixed = m.fixed()
-  
-  
-  
-    
-  
-  
-"""  
-    vars = m.getVars()      #vars[-1]检索到的就是最后一个变量 而不考虑是不是为1
-    x0 = vars[-1]           #Retrieve a list of all variables in the model. 
-    print(vars[0].varName, vars[0].x)
-    print(x0)
-    
-"""  
-  
-  
-  
-  
-  
-"""
-    for k in range(K):
-        for i in range(I):
-            for j in range(J):
-                u[i,j,k] = x_var[i,j,k].get()    
-    print('k=1',u[i,j,k])
-        
+    print('optimal value: %.2f'%obj.getValue())
     #for var in m.getVars():
         #print(f"{var.varName}: {round(var.x)}")
-"""
-
     
+    
+#    print(Products)
+    Prod_KI=[]    
+    for k in range(K):
+        Prod_KI.append([])
+        for i in range(I):
+            Prod_KI[k].append([])
+#            SelectedX_j=np.zeros(J)        #生成了一个很稀疏的列表 
+            for j in range(J):
+                if x[i,j,k].x == 1:
+#                    SelectedX_j[j]=x[i,j,k].x
+                    Prod_KI[k][i].append(Products[j])
+    
+#    print(Prod_KI)
+    for k in range(K):
+        for i in range(I):
+            if Prod_KI[k][i] != []:
+                rec_packing(Prod_KI[k][i],bin_width,bin_height)
+    
+            
+            
+            
+#Products = []
+#for i in range(15):
+#    Products.append(Product(np.random.randint(5,30),np.random.randint(5,30)))
+#    print(Products[i])              
+            
+            
+            
+            
