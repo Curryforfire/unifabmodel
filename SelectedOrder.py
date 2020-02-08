@@ -35,22 +35,19 @@ def SelectedOrder(I,J,K,h,tt,s,S,sigma):
         #print(f"{var.varName}: {round(var.x)}")
     
     
-#    print(Products)
     Prod_KI=[]    
     for k in range(K):
         Prod_KI.append([])
         for i in range(I):
             Prod_KI[k].append([])
-#            SelectedX_j=np.zeros(J)        #生成了一个很稀疏的列表 
             for j in range(J):
                 if x[i,j,k].x == 1:
-#                    SelectedX_j[j]=x[i,j,k].x
                     Prod_KI[k][i].append(Products[j])
     
-#    print(Prod_KI)
     for k in range(K):
         for i in range(I):
             if Prod_KI[k][i] != []:
+                print('\n machine {:.0f} at period {:.0f} :'.format(k+1,i+1))
                 rec_packing(Prod_KI[k][i],bin_width,bin_height)
     
             
