@@ -30,13 +30,17 @@ whdic = {}
 duetimedic = {}
 
 
-def prodclass(a,b,tt):
+def prodclass(a,b,tt,collect_unchosen):
     """对生成的全体零件定义为符合零件类class的形式
     """  
     Products = []      #每次点击接着之前生成的列表，若要求默认置为空，则在函参中添加此行
     for j in range(J):        
         Products.append(Product(a[j],b[j],tt[j]))
         print(Products[j]) 
+    for j in range(len(collect_unchosen)):
+        m = collect_unchosen[j]
+        Products.append(Product(whdic[m][0],whdic[m][1],duetimedic[m]))
+        print(Products[j])
     return Products
 
 def dic_all(Products,duetimedic,dicforall={}):
@@ -79,9 +83,11 @@ def unchosen(collect_unchosen,rec_unchosen,whdic,rec_dict,duedic):
 def printunchosen(collect_unchosen,whdic,duetimedic):
     """输出所有未被选中的零件编号，width,height和duetime
     """
-    for i in range(len(collect_unchosen)):
+    n = len(collect_unchosen)
+    for i in range(n):
         print(collect_unchosen[i],whdic[collect_unchosen[i]],duetimedic[collect_unchosen[i]])
-  
+    return n
+    
 def rec_packing(Prod_KI, bin_width, bin_height):
     """主函数，调用nextlayer和topright两个函数
     分别解决左下方开始和阶梯型右上角基于高度递减
