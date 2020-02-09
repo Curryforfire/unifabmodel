@@ -15,37 +15,73 @@ class Product(object):
     def get_height(self):
         return self.height
     def get_duetime(self):
-        return self.duetime
+        return self.duetime        
     def __str__(self):
         return str(self.rid).zfill(3) + ': <' + str(self.width)\
                  + ', ' + str(self.height) + '>' + ' duetime:' \
                  + str(self.duetime)
 
+
+"""等每一次计算完成后，将未选中的挑出重新进行计算，
+然后把下式清空。感觉类的作用没有完全体现出来……
+"""
+collect_unchosen = []    
+whdic = {}
+duetimedic = {}
+
+
 def prodclass(a,b,tt):
     """对生成的全体零件定义为符合零件类class的形式
-    """
-    Products = []
-    for j in range(J):
+    """  
+    Products = []      #每次点击接着之前生成的列表，若要求默认置为空，则在函参中添加此行
+    for j in range(J):        
         Products.append(Product(a[j],b[j],tt[j]))
         print(Products[j]) 
     return Products
 
-def dic_all(Products,dicforall={}):
+def dic_all(Products,duetimedic,dicforall={}):
     """对全体零件集合以编码作key，（width和height）
     作为value
     """
     for i in range(len(Products)):
         dicforall[Products[i].get_rid()]=(Products[i].get_width(),Products[i].get_height())
-    return dicforall 
+        duetimedic[Products[i].get_rid()]=Products[i].get_duetime()
+    return (dicforall,duetimedic) 
 
 def pick(Prod_KI,dictionary={}):
     """对每一版零件单独定义字典，以本身编号作为key，
     （width和height）作为value
     """
     for i in range(len(Prod_KI)):
-        dictionary[Prod_KI[i].get_rid()]=(Prod_KI[i].get_width(),Prod_KI[i].get_height())        
+        dictionary[Prod_KI[i].get_rid()]=(Prod_KI[i].get_width(),Prod_KI[i].get_height())  
+#    if collect_unchosen != []: 
+#        for i in range(len(collect_unchosen)):
+#            key = str(collect_unchosen[i])
+#            dictionary[key]=dicforall[key]
     return dictionary
 
+def unchosen(collect_unchosen,rec_unchosen,whdic,rec_dict,duedic):
+    """未被选择的零件集合，字典unchosendict通过零件
+    编号访问width和height，字典duetimedic通过上述key
+    访问duetime    
+    """    
+    for i in range(len(rec_dict)):
+        rec_unchosen.append(rec_dict[i][0]) 
+        whdic[rec_dict[i][0]]=rec_dict[i][1]
+        duetimedic[rec_dict[i][0]]=duedic[rec_dict[i][0]]
+    if rec_unchosen != []:
+        print("\nUnchosen items : ",rec_unchosen)   
+    collect_unchosen += rec_unchosen 
+    if collect_unchosen != []:
+        print('so far unchosen products : ',collect_unchosen)
+    return collect_unchosen 
+ 
+def printunchosen(collect_unchosen,whdic,duetimedic):
+    """输出所有未被选中的零件编号，width,height和duetime
+    """
+    for i in range(len(collect_unchosen)):
+        print(collect_unchosen[i],whdic[collect_unchosen[i]],duetimedic[collect_unchosen[i]])
+  
 def rec_packing(Prod_KI, bin_width, bin_height):
     """主函数，调用nextlayer和topright两个函数
     分别解决左下方开始和阶梯型右上角基于高度递减
@@ -67,14 +103,17 @@ def rec_packing(Prod_KI, bin_width, bin_height):
     index_topright=[[]]
     rec_dict=[]
     rec_unchosen=[]
+    
     t=0
     i=0
     layer_index=0
     s1=0
     s2=0  
     S=bin_width*bin_height
-    dicforall = dic_all(Products)
+    
+    (dicforall,duedic) = dic_all(Products,duetimedic,dicforall={})  
     mydict = pick(Prod_KI,dictionary={}) 
+    
     rec_dict = sorted(mydict.items(),key=lambda s: (s[1][1],s[1][0]), reverse=True)  
     """对零件集合组成的字典重新排序（height递减）
     但不改变对应key的值,排序后是list中套元组，元
@@ -94,15 +133,14 @@ def rec_packing(Prod_KI, bin_width, bin_height):
         except:
             continue
     print("\nOccupancy Rate: {:.3f}".format((s1+s2)/S))
-#输出未被打印的零件
-    for i in range(len(rec_dict)):
-        rec_unchosen.append(rec_dict[i][0])        
-    print("\nUnchosen items : ",rec_unchosen)       
+#输出未被打印的零件集合  
+    unchosen(collect_unchosen,rec_unchosen,whdic,rec_dict,duedic)
+    
     
 def nextlayer(cmax_height,item_existed,rec_dict,Products,cur_layer,cur_width,item_selected,max_height,layer_index,i=0):       #cur_layer是最高层数 而layer_index是需要遍历的每一层    
     """从第一层开始，如果第i层横向有空间可装,
     则调用firsrfit进行装箱，否则判断i+1层
-    """
+    """ 
     if rec_dict != []: 
         if max_height + rec_dict[-1][1][1] <= bin_height:   #这种情况满足的条件就是rec_dict非空
             for r in rec_dict[:]:              #[:]
