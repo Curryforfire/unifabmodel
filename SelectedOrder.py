@@ -68,8 +68,10 @@ def SelectedOrder(I,J,K,h,tt,s,S):
 
 
 """将添加约束和添加变量写成函数形式
-"""
+"""     
 def parameter(collect_unchosen,whdic,duetimedic): 
+    """以列表形式返回每次未选中零件的尺寸、截止时间信息
+    """
     num = len(collect_unchosen)
     tt_due = []
     s_size = []
@@ -80,15 +82,15 @@ def parameter(collect_unchosen,whdic,duetimedic):
             s_size.append(whdic[m][0]*whdic[m][1])
     return (num,tt_due,s_size)
 
-#添加变量    
+#添加变量     
 def addvar_x(m,I,J,K):
     var = m.addVars(I,J,K,vtype=GRB.BINARY,name="x")
     return var            
             
 #添加截止时间约束          
 def addcon_tt(m,I,J,K,x,Y_b,tt,tt1):  
-    tt=list(tt)     #Invalid argument to LinExpr multiplication
-    tt += tt1  #tt变为列表后就不能直接相乘？？？   
+    tt=list(tt)
+    tt += tt1    
     m.addConstrs(tt[j]*x[i,j,k] >= Y_b[i,j,k] for j in range (J) for i in range (I) for k in range (K))         
 
 #添加底面积约束             

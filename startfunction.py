@@ -4,9 +4,9 @@ import numpy as np
 #期数
 I=2
 #零件数
-J=10
+J=200
 #机器数
-K=2
+K=10
 #打印机版面长度
 bin_height=60
 #打印机版面宽度

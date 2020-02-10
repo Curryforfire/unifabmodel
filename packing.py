@@ -14,6 +14,8 @@ class Product(object):
         return self.width
     def get_height(self):
         return self.height
+#    def get_(self):                 #目前是通过tag逐个增加序号，定义函数访问零件编号
+        
     def get_duetime(self):
         return self.duetime        
     def __str__(self):
@@ -23,29 +25,30 @@ class Product(object):
 
 
 """等每一次计算完成后，将未选中的挑出重新进行计算，
-然后把下式清空。感觉类的作用没有完全体现出来……
-"""
+然后更新（过渡，需要完善）
+"""  
 collect_unchosen = []    
 whdic = {}
 duetimedic = {}
 
 
-def prodclass(a,b,tt,collect_unchosen):
-    """对生成的全体零件定义为符合零件类class的形式
+def prodclass(a,b,tt,collect_unchosen):            # ！！！
+    """对新生成的全体零件（同时加上之前阶段中未
+    被选中的零件）定义为符合零件类class的形式
     """  
     Products = []      #每次点击接着之前生成的列表，若要求默认置为空，则在函参中添加此行
     for j in range(J):        
         Products.append(Product(a[j],b[j],tt[j]))
-        print(Products[j]) 
     for j in range(len(collect_unchosen)):
-        m = collect_unchosen[j]
+        m = collect_unchosen[j]                                        #问题出在这！！！
         Products.append(Product(whdic[m][0],whdic[m][1],duetimedic[m]))
-        print(Products[j])
+    for j in range(J+len(collect_unchosen)):
+        print(Products[j])  
     return Products
-
+    
 def dic_all(Products,duetimedic,dicforall={}):
     """对全体零件集合以编码作key，（width和height）
-    作为value
+    和duetime作为value  
     """
     for i in range(len(Products)):
         dicforall[Products[i].get_rid()]=(Products[i].get_width(),Products[i].get_height())
@@ -58,10 +61,6 @@ def pick(Prod_KI,dictionary={}):
     """
     for i in range(len(Prod_KI)):
         dictionary[Prod_KI[i].get_rid()]=(Prod_KI[i].get_width(),Prod_KI[i].get_height())  
-#    if collect_unchosen != []: 
-#        for i in range(len(collect_unchosen)):
-#            key = str(collect_unchosen[i])
-#            dictionary[key]=dicforall[key]
     return dictionary
 
 def unchosen(collect_unchosen,rec_unchosen,whdic,rec_dict,duedic):
@@ -76,8 +75,8 @@ def unchosen(collect_unchosen,rec_unchosen,whdic,rec_dict,duedic):
     if rec_unchosen != []:
         print("\nUnchosen items : ",rec_unchosen)   
     collect_unchosen += rec_unchosen 
-    if collect_unchosen != []:
-        print('so far unchosen products : ',collect_unchosen)
+#    if collect_unchosen != []:
+#        print('so far unchosen products : ',collect_unchosen)
     return collect_unchosen 
  
 def printunchosen(collect_unchosen,whdic,duetimedic):
@@ -109,7 +108,6 @@ def rec_packing(Prod_KI, bin_width, bin_height):
     index_topright=[[]]
     rec_dict=[]
     rec_unchosen=[]
-    
     t=0
     i=0
     layer_index=0
