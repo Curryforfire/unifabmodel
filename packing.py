@@ -14,8 +14,7 @@ class Product(object):
         return self.width
     def get_height(self):
         return self.height
-#    def get_(self):                 #目前是通过tag逐个增加序号，定义函数访问零件编号
-        
+#    def get_(self):                 #目前是通过tag逐个增加序号，定义函数访问零件编号   
     def get_duetime(self):
         return self.duetime        
     def __str__(self):
@@ -29,23 +28,27 @@ class Product(object):
 """  
 collect_unchosen = []    
 whdic = {}
-duetimedic = {}
+duetimedic = {} 
 
-
-def prodclass(a,b,tt,collect_unchosen):            # ！！！
+def prodclass(a,b,tt,collect_unchosen,whdic,duetimedic):            # ！！！
     """对新生成的全体零件（同时加上之前阶段中未
     被选中的零件）定义为符合零件类class的形式
     """  
+    unchosen_copy = collect_unchosen.copy()
     Products = []      #每次点击接着之前生成的列表，若要求默认置为空，则在函参中添加此行
     for j in range(J):        
         Products.append(Product(a[j],b[j],tt[j]))
-    for j in range(len(collect_unchosen)):
-        m = collect_unchosen[j]                                        #问题出在这！！！
+    for j in range(len(unchosen_copy)):
+        m = unchosen_copy[j]                                        #问题出在这！！！
         Products.append(Product(whdic[m][0],whdic[m][1],duetimedic[m]))
-    for j in range(J+len(collect_unchosen)):
+        whdic[Products[j+len(unchosen_copy)]]=whdic[m]
+        duetimedic[Products[j+len(unchosen_copy)]]=duetimedic[m]     
+    for j in range(J+len(unchosen_copy)):
         print(Products[j])  
-    return Products
-    
+    collect_unchosen = []
+    return Products,collect_unchosen,unchosen_copy
+
+      
 def dic_all(Products,duetimedic,dicforall={}):
     """对全体零件集合以编码作key，（width和height）
     和duetime作为value  
@@ -67,7 +70,8 @@ def unchosen(collect_unchosen,rec_unchosen,whdic,rec_dict,duedic):
     """未被选择的零件集合，字典unchosendict通过零件
     编号访问width和height，字典duetimedic通过上述key
     访问duetime    
-    """    
+    """
+    
     for i in range(len(rec_dict)):
         rec_unchosen.append(rec_dict[i][0]) 
         whdic[rec_dict[i][0]]=rec_dict[i][1]
@@ -75,16 +79,16 @@ def unchosen(collect_unchosen,rec_unchosen,whdic,rec_dict,duedic):
     if rec_unchosen != []:
         print("\nUnchosen items : ",rec_unchosen)   
     collect_unchosen += rec_unchosen 
-#    if collect_unchosen != []:
-#        print('so far unchosen products : ',collect_unchosen)
-    return collect_unchosen 
+    if collect_unchosen != []:
+        print('so far unchosen products : ',collect_unchosen)
+    return collect_unchosen
  
-def printunchosen(collect_unchosen,whdic,duetimedic):
+def printunchosen(unchosen_copy,whdic,duetimedic):
     """输出所有未被选中的零件编号，width,height和duetime
     """
-    n = len(collect_unchosen)
+    n = len(unchosen_copy)
     for i in range(n):
-        print(collect_unchosen[i],whdic[collect_unchosen[i]],duetimedic[collect_unchosen[i]])
+        print(unchosen_copy[i],whdic[unchosen_copy[i]],duetimedic[unchosen_copy[i]])
     return n
     
 def rec_packing(Prod_KI, bin_width, bin_height):
@@ -138,8 +142,8 @@ def rec_packing(Prod_KI, bin_width, bin_height):
             continue
     print("\nOccupancy Rate: {:.3f}".format((s1+s2)/S))
 #输出未被打印的零件集合  
-    unchosen(collect_unchosen,rec_unchosen,whdic,rec_dict,duedic)
-    
+    un_collect = unchosen(collect_unchosen,rec_unchosen,whdic,rec_dict,duedic)
+    return un_collect
     
 def nextlayer(cmax_height,item_existed,rec_dict,Products,cur_layer,cur_width,item_selected,max_height,layer_index,i=0):       #cur_layer是最高层数 而layer_index是需要遍历的每一层    
     """从第一层开始，如果第i层横向有空间可装,

@@ -6,7 +6,7 @@ def SelectedOrder(I,J,K,h,tt,s,S):
     m=Model('UnionFab_Model')
     
     num_unchosen=0
-    num_unchosen,tt1,s1 = parameter(collect_unchosen,whdic,duetimedic)
+    num_unchosen,tt1,s1 = parameter(unchosen_copy,whdic,duetimedic)
     J += num_unchosen 
        
     #变量
@@ -65,19 +65,19 @@ def SelectedOrder(I,J,K,h,tt,s,S):
             if Prod_KI[k][i] != []:
                 print('\n machine {:.0f} at period {:.0f} :'.format(k+1,i+1))
                 rec_packing(Prod_KI[k][i],bin_width,bin_height)
-
+    
 
 """将添加约束和添加变量写成函数形式
 """     
-def parameter(collect_unchosen,whdic,duetimedic): 
+def parameter(unchosen_copy,whdic,duetimedic): 
     """以列表形式返回每次未选中零件的尺寸、截止时间信息
     """
-    num = len(collect_unchosen)
+    num = len(unchosen_copy)
     tt_due = []
     s_size = []
     if num != 0:
         for i in range(num):
-            m = collect_unchosen[i] 
+            m = unchosen_copy[i] 
             tt_due.append(duetimedic[m])
             s_size.append(whdic[m][0]*whdic[m][1])
     return (num,tt_due,s_size)
